@@ -18,6 +18,9 @@ function Level:init()
     -- actual collision callbacks can cause stack overflow and other errors
     self.destroyedBodies = {}
 
+    --EDIT: Flag to keep track of whether any collisions have happened or not
+    self.collided = false
+
     -- define collision callbacks for our world; the World object expects four,
     -- one for different stages of any given collision
     function beginContact(a, b, coll)
@@ -28,6 +31,7 @@ function Level:init()
         -- if we collided between both the player and an obstacle...
         if types['Obstacle'] and types['Player'] then
 
+            self.collided = true
             -- grab the body that belongs to the player
             local playerFixture = a:getUserData() == 'Player' and a or b
             local obstacleFixture = a:getUserData() == 'Obstacle' and a or b
@@ -59,6 +63,8 @@ function Level:init()
 
         -- if we collided between the player and the alien...
         if types['Player'] and types['Alien'] then
+
+            self.collided = true
 
             -- grab the bodies that belong to the player and alien
             local playerFixture = a:getUserData() == 'Player' and a or b
@@ -172,18 +178,60 @@ function Level:update(dt)
 
     -- replace launch marker if original alien stopped moving
     if self.launchMarker.launched then
-        local xPos, yPos = self.launchMarker.alien.body:getPosition()
-        local xVel, yVel = self.launchMarker.alien.body:getLinearVelocity()
+        local xPos, yPos = self.launchMarker.aliens[1].body:getPosition()
+        local xVel, yVel = self.launchMarker.aliens[1].body:getLinearVelocity()
+
+        -- EDIT: Check to see if all aliens are backwards or stopped rolling
+        local respawnCheck = true
+
+        for i = 1, #self.launchMarker.aliens do
+            xPos, yPos = self.launchMarker.aliens[i].body:getPosition()
+            xVel, yVel = self.launchMarker.aliens[1].body:getLinearVelocity()
+
+            if (xPos > 0 and math.abs(xVel) + math.abs(yVel) >= 1) then
+                respawnCheck = false
+            end
+        end
         
-        -- if we fired our alien to the left or it's almost done rolling, respawn
-        if xPos < 0 or (math.abs(xVel) + math.abs(yVel) < 1.5) then
-            self.launchMarker.alien.body:destroy()
+
+        if respawnCheck then
+            for i = 1, #self.launchMarker.aliens do
+                self.launchMarker.aliens[i].body:destroy()
+            end
+            self.collided = false
             self.launchMarker = AlienLaunchMarker(self.world)
 
             -- re-initialize level if we have no more aliens
             if #self.aliens == 0 then
                 gStateMachine:change('start')
             end
+        end
+
+        if love.keyboard.wasPressed('space') and not self.collided then
+
+            self.collided = true
+
+            local originalAlien = self.launchMarker.aliens[1]
+
+            -- spawn new alien in the world, passing in user data of player
+            local newAlien1 = Alien(self.world, 'round', xPos, yPos + 10, 'Player')
+
+            -- apply the difference between current X,Y and base X,Y as launch vector impulse
+            newAlien1.body:setLinearVelocity(xVel, yVel + 5)
+
+            -- make the alien pretty bouncy
+            newAlien1.fixture:setRestitution(0.4)
+            newAlien1.body:setAngularDamping(1)
+
+            local newAlien2 = Alien(self.world, 'round', xPos, yPos - 10, 'Player')
+
+            newAlien2.body:setLinearVelocity(xVel, yVel - 5)
+
+            newAlien2.fixture:setRestitution(0.4)
+            newAlien2.body:setAngularDamping(1)
+
+            table.insert(self.launchMarker.aliens, newAlien1)
+            table.insert(self.launchMarker.aliens, newAlien2)
         end
     end
 end

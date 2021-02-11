@@ -4,6 +4,9 @@
 
     Author: Colton Ogden
     cogden@cs50.harvard.edu
+
+    Edited by: Adam Martini
+    martiniadam23@gmail.com
 ]]
 
 AlienLaunchMarker = Class{}
@@ -25,8 +28,8 @@ function AlienLaunchMarker:init(world)
     -- whether we launched the alien and should stop rendering the preview
     self.launched = false
 
-    -- our alien we will eventually spawn
-    self.alien = nil
+    -- EDIT: Make this a table to account for additional aliens
+    self.aliens = {}
 end
 
 function AlienLaunchMarker:update(dt)
@@ -46,14 +49,17 @@ function AlienLaunchMarker:update(dt)
             self.launched = true
 
             -- spawn new alien in the world, passing in user data of player
-            self.alien = Alien(self.world, 'round', self.shiftedX, self.shiftedY, 'Player')
+            -- EDIT: This is now just one of potentially many
+            local alien = Alien(self.world, 'round', self.shiftedX, self.shiftedY, 'Player')
 
             -- apply the difference between current X,Y and base X,Y as launch vector impulse
-            self.alien.body:setLinearVelocity((self.baseX - self.shiftedX) * 10, (self.baseY - self.shiftedY) * 10)
+            alien.body:setLinearVelocity((self.baseX - self.shiftedX) * 10, (self.baseY - self.shiftedY) * 10)
 
             -- make the alien pretty bouncy
-            self.alien.fixture:setRestitution(0.4)
-            self.alien.body:setAngularDamping(1)
+            alien.fixture:setRestitution(0.4)
+            alien.body:setAngularDamping(1)
+
+            table.insert(self.aliens, alien)
 
             -- we're no longer aiming
             self.aiming = false
@@ -103,6 +109,9 @@ function AlienLaunchMarker:render()
         
         love.graphics.setColor(1, 1, 1, 1)
     else
-        self.alien:render()
+        --EDIT: Now taking into account multiple aliens
+        for k, alien in pairs(self.aliens) do
+            alien:render()
+        end
     end
 end

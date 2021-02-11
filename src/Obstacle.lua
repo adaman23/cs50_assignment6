@@ -5,6 +5,9 @@
     Author: Colton Ogden
     cogden@cs50.harvard.edu
 
+    Edited by: Adam Martini
+    martiniadam23@gmail.com
+
     An Obstacle is any physics-based construction that forms the current level,
     usually shielding the aliens the player is trying to kill; they can form houses,
     boxes, anything the developer wishes. Depending on what kind they are, they are

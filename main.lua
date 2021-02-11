@@ -5,6 +5,11 @@
     Author: Colton Ogden
     cogden@cs50.harvard.edu
 
+    Edited by: Adam Martini
+    martiniadam23@gmail.com
+
+    Note: All edits will be denoted by EDIT or start with a capital letter
+
     Released by Rovio in 2009, Angry Birds took the mobile gaming scene by storm back
     when it was still arguably in its infancy. Using the simple gameplay mechanic of
     slingshotting birds into fortresses of various materials housing targeted pigs,

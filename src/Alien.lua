@@ -4,6 +4,9 @@
 
     Author: Colton Ogden
     cogden@cs50.harvard.edu
+
+    Edited by: Adam Martini
+    martiniadam23@gmail.com
 ]]
 
 Alien = Class{}
@@ -31,6 +34,7 @@ function Alien:init(world, type, x, y, userData)
 
     -- used to keep track of despawning the Alien and flinging it
     self.launched = false
+
 end
 
 function Alien:render()
